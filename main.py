@@ -6,10 +6,20 @@ import uuid
 from dotenv import load_dotenv
 from mangum import Mangum
 import requests
+from fastapi.middleware.cors import CORSMiddleware
+
 
 
 app = FastAPI()
 load_dotenv()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow requests from all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # You can specify specific HTTP methods if needed
+    allow_headers=["*"],  # You can specify specific headers if needed
+)
 
 ACCESS_KEY = os.getenv('ACCESS_KEY')
 SECRET_KEY = os.getenv('SECRET_ACCESS_KEY')
@@ -48,15 +58,17 @@ async def upload_image(file: UploadFile):
             'unique_id': '132',
             'image_urls': s3_url
         }
+        print(params)
 
         headers = {
             'accept': 'application/json',
         }
 
         response = requests.post(url, params=params, headers=headers)
+        print(response)
 
         return JSONResponse(content={"message": "Image uploaded successfully", "output": response.json()}, status_code=200)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-handler = Mangum(app)
+# handler = Mangum(app)
